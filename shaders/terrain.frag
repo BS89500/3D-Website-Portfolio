@@ -7,7 +7,7 @@ void main() {
     vec3 V = normalize(cameraPosition - vWorldPosition);
     vec3 L = normalize(vec3(-0.6, 0.45, -0.65));
     vec3 H = normalize(L + V);
-
+    
     vec3 deepUpwellingColor = vec3(0.02, 0.07, 0.18);
     vec3 bodyScatterColor   = vec3(0.06, 0.16, 0.34);
     vec3 skyReflectColor    = vec3(0.24, 0.38, 0.58);

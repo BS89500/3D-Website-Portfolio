@@ -24,35 +24,40 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 container.appendChild(renderer.domElement);
 
-// --- 2. VOLUMETRIC CLOUDS ---
-// Lifted high into the atmosphere (y: 120) so the camera looks up at them
-const boxCenter = new THREE.Vector3(0, 120, -150); 
-const boxSize = new THREE.Vector3(800, 80, 500); 
+// --- 1. GENERATE 3D NOISE TEXTURE ---
+const texSize3D = 64; // 64x64x64 resolution
+const volumeData = new Uint8Array(texSize3D * texSize3D * texSize3D);
 
-const boxMin = new THREE.Vector3().subVectors(boxCenter, boxSize.clone().multiplyScalar(0.5));
-const boxMax = new THREE.Vector3().addVectors(boxCenter, boxSize.clone().multiplyScalar(0.5));
+let index = 0;
+for (let z = 0; z < texSize3D; z++) {
+  for (let y = 0; y < texSize3D; y++) {
+    for (let x = 0; x < texSize3D; x++) {
+      // Scale coordinates to control noise frequency
+      let nx = x * 0.15;
+      let ny = y * 0.15;
+      let nz = z * 0.15;
+      
+      // Temporary placeholder math. 
+      // You can swap this later with josephg/noisejs like you do for your terrain.
+      let noiseVal = (Math.sin(nx) + Math.cos(ny) + Math.sin(nz) + 3) / 6; 
+      
+      volumeData[index] = Math.floor(noiseVal * 255);
+      index++;
+    }
+  }
+}
 
-const cloudGeometry = new THREE.BoxGeometry(boxSize.x, boxSize.y, boxSize.z);
-cloudGeometry.translate(boxCenter.x, boxCenter.y, boxCenter.z);
+const noiseTexture3D = new THREE.Data3DTexture(volumeData, texSize3D, texSize3D, texSize3D);
+noiseTexture3D.format = THREE.RedFormat;
+noiseTexture3D.type = THREE.UnsignedByteType;
 
-const cloudMaterial = new THREE.ShaderMaterial({
-  uniforms: {
-    uTime: { value: 0 },
-    uSunDirection: { value: new THREE.Vector3(-0.6, 0.45, -0.65) }, 
-    uSunColor: { value: new THREE.Color(0xffffff) },
-    uSkyColor: { value: new THREE.Color(0x3a6090) },
-    uBoxMin: { value: boxMin },
-    uBoxMax: { value: boxMax }
-  },
-  vertexShader: cloudVertexShader,
-  fragmentShader: cloudFragmentShader,
-  transparent: true,
-  side: THREE.DoubleSide, // Guarantees rendering when looking up from outside the bounds
-  depthWrite: false, 
-});
-
-const cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
-scene.add(cloudMesh);
+// Enable repeating so the raymarcher can tile the volume endlessly
+noiseTexture3D.wrapS = THREE.RepeatWrapping;
+noiseTexture3D.wrapT = THREE.RepeatWrapping;
+noiseTexture3D.wrapR = THREE.RepeatWrapping;
+noiseTexture3D.minFilter = THREE.LinearFilter;
+noiseTexture3D.magFilter = THREE.LinearFilter;
+noiseTexture3D.needsUpdate = true;
 
 
 // --- 3. BACKGROUND SKY CARD ---
@@ -220,7 +225,6 @@ function animate(time) {
 
   terrainMaterial.uniforms.uTime.value = elapsedTime;
   terrainMaterial.uniforms.uScrollProgress.value = currentProgress;
-  cloudMaterial.uniforms.uTime.value = elapsedTime;
   skyMaterial.uniforms.uTime.value = elapsedTime;
   
   renderer.render(scene, camera);
