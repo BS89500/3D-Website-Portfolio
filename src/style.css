@@ -265,6 +265,40 @@ code {
   }
 }
 
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #0a1128;
+  z-index: 9999;
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 1.2s;
+}
+
+#loading-screen.fade-out {
+opacity: 0;
+visibility: hidden;
+}
+
+
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-left-color: #8ab4f8; /* Matches your UI accent color */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+
+
 #spacer {
   height: 88px;
   border-top: 1px solid var(--border);
@@ -293,4 +327,5 @@ code {
     right: 0;
     border-right-color: var(--border);
   }
+
 }
