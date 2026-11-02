@@ -18,7 +18,7 @@ void main() {
 
     // --- GLOBAL WAVE SCALE ---
     // Increase this number to pack more waves into the scene (e.g., 2.0, 3.0, 4.0)
-    float waveScale = 1.0; 
+    float waveScale = 0.8; 
     
     // Scale the sampling coordinates
     vec2 coord = p.xz * waveScale;
